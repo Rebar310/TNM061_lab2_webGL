@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>TNM061 Lab 2: WebGL with three.js</title>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
+    />
+    <style>
+      body {
+        margin: 0px;
+      }
+      .ui {
+        position: absolute;
+        left: 0;
+        top: 0;
+        border: 1px solid darkgray;
+        color: white;
+        background: rgba(200, 200, 200, 0.4);
+        font-weight: 400;
+        font-family: sans-serif;
+        font-size: 100%;
+        line-height: 130%;
+        margin: 0.4em;
+        padding: 0.5em;
+        min-width: 150px;
+      }
+      .heading {
+        font-size: 110%;
+        font-weight: 600;
+        padding-bottom: 0.2em;
+      }
+    </style>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.172.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.172.0/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+
+  <body>
+    <div class="ui">
+      <div class="heading">Settings</div>
+      <div>
+        <input type="checkbox" id="animation" name="animation" checked />
+        <label for="animation">Animation</label>
+      </div>
+      <div>
+        <input type="checkbox" id="wireframe" name="wireframe" checked />
+        <label for="wireframe">Wireframe</label>
+      </div>
+    </div>
+    <!-- Task 7: material using custom Vertex Shader and Fragment Shader -->
+    <script type="x-shader/x-vertex" id="vertexShader">
+
+      varying vec3 vWorldpos;
+      varying vec3 vNormal;
+      varying vec2 vUv;
+
+      // for built-in uniforms & attributes see https://threejs.org/docs/#api/en/renderers/webgl/WebGLProgram
+
+      void main() {
+          vNormal = normalMatrix * normal;
+          vUv = uv; // texture coordinates
+
+          vec4 worldpos = modelViewMatrix * vec4(position, 1.0);
+          vWorldpos = worldpos.xyz;
+
+          gl_Position = projectionMatrix * worldpos;
+      }
+    </script>
+    <script type="x-shader/x-fragment" id="fragmentShader">
+
+      struct PointLight {
+          vec3 position;
+          vec3 color;
+      };
+      uniform PointLight pointLights[ NUM_POINT_LIGHTS ];
+      uniform vec3 ambientLightColor;
+      uniform sampler2D colorTexture;
+      uniform sampler2D specularTexture;
+
+      varying vec3 vWorldpos;
+      varying vec3 vNormal;
+      varying vec2 vUv;
+
+      void main() {
+          vec4 color = texture2D(colorTexture, vUv);
+          vec3 normal = normalize(vNormal);
+
+          vec3 lightDir = normalize(pointLights[0].position - vWorldpos);
+          vec3 viewDir = normalize(cameraPosition - vWorldpos);
+          vec3 reflectDir = reflect(-lightDir, normal);
+
+          float specFactor = texture2D(specularTexture, vUv).r;
+          float spec = pow(max(dot(viewDir, reflectDir), 0.0), 16.0) * specFactor;
+
+          vec3 diffuse = max(dot(normal, lightDir), 0.0) * pointLights[0].color;
+          vec3 finalColor = color.xyz * (diffuse + ambientLightColor) + spec * pointLights[0].color;
+
+          gl_FragColor = vec4(finalColor, 1.0);
+      }
+    </script>
+
+    <div id="container"></div>
+
+    <script src="https://threejs.org/build/three.js"></script>
+    <script type="module" src="/lab2.js"></script>
+  </body>
+</html>
