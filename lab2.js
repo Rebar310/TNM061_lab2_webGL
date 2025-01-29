@@ -85,13 +85,13 @@ function init() {
   sunMesh = new THREE.Mesh(geometrySun, materialSun);
   sunGroup.add(sunMesh);
 
-  var sunLight = new THREE.PointLight(0xffffff, 50, 50);
+  var sunLight = new THREE.PointLight(0xffffff, 1, 200);
   sunGroup.add(sunLight);
 
   var ambientLight = new THREE.AmbientLight(0x202020);
   sceneRoot.add(ambientLight);
 
-  var geometryEarth = new THREE.SphereGeometry(1, 32, 16);
+  var geometryEarth = new THREE.SphereGeometry(1, 10, 16);
   const earthTexture = texloader.load("tex/2k_earth_daymap.jpg");
   const specularTexture = texloader.load("tex/2k_earth_specular_map.jpg");
 
