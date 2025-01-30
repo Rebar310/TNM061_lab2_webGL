@@ -57,52 +57,54 @@
     <!-- Task 7: material using custom Vertex Shader and Fragment Shader -->
     <script type="x-shader/x-vertex" id="vertexShader">
 
-      varying vec3 vWorldpos;
-      varying vec3 vNormal;
-      varying vec2 vUv;
+      varying vec3 vWorldpos;  // Variabel för vertexens position i världen
+      varying vec3 vNormal;  // Variabel för vertexens normal
+      varying vec2 vUv;  // Variabel för texturkoordinater
+
 
       // for built-in uniforms & attributes see https://threejs.org/docs/#api/en/renderers/webgl/WebGLProgram
 
       void main() {
-          vNormal = normalMatrix * normal;
-          vUv = uv; // texture coordinates
+          vNormal = normalMatrix * normal; // Omvandlar normalvektorn till världens koordinater
+          vUv = uv; // texture coordinates  // Sparar texturkoordinaterna
 
-          vec4 worldpos = modelViewMatrix * vec4(position, 1.0);
-          vWorldpos = worldpos.xyz;
+          vec4 worldpos = modelViewMatrix * vec4(position, 1.0);  // Beräknar positionen i världen
+          vWorldpos = worldpos.xyz;  // Lagrar den beräknade positionen
 
-          gl_Position = projectionMatrix * worldpos;
+          gl_Position = projectionMatrix * worldpos;  // Transformerar till skärmkoordinater
       }
     </script>
     <script type="x-shader/x-fragment" id="fragmentShader">
 
       struct PointLight {
-          vec3 position;
-          vec3 color;
+          vec3 position;  // Ljusets position
+          vec3 color;  // Ljusets färg
       };
-      uniform PointLight pointLights[ NUM_POINT_LIGHTS ];
-      uniform vec3 ambientLightColor;
-      uniform sampler2D colorTexture;
-      uniform sampler2D specularTexture;
+      uniform PointLight pointLights[ NUM_POINT_LIGHTS ]; // Array av punktljus
+      uniform vec3 ambientLightColor; // Ambient-ljusets färg
+      uniform sampler2D colorTexture; // Jordens textur
+      uniform sampler2D specularTexture; // Specular-karta för reflektion
 
-      varying vec3 vWorldpos;
-      varying vec3 vNormal;
-      varying vec2 vUv;
+      varying vec3 vWorldpos;  // Position i världens koordinatsystem
+      varying vec3 vNormal;  // Normalvektor för ytan
+      varying vec2 vUv;  // Texturkoordinater
+
 
       void main() {
-          vec4 color = texture2D(colorTexture, vUv);
-          vec3 normal = normalize(vNormal);
+          vec4 color = texture2D(colorTexture, vUv); // Hämtar färg från jordens textur och minskar ljusstyrkan
+          vec3 normal = normalize(vNormal); // Normaliserar normalvektorn
 
-          vec3 lightDir = normalize(pointLights[0].position - vWorldpos);
-          vec3 viewDir = normalize(cameraPosition - vWorldpos);
-          vec3 reflectDir = reflect(-lightDir, normal);
+          vec3 lightDir = normalize(pointLights[0].position - vWorldpos); // Riktning från ytan till ljuskällan
+          vec3 viewDir = normalize(cameraPosition - vWorldpos); // Riktning från ytan till kameran
+          vec3 reflectDir = reflect(-lightDir, normal); // Reflekterad ljusvektor
 
-          float specFactor = texture2D(specularTexture, vUv).r;
-          float spec = pow(max(dot(viewDir, reflectDir), 0.0), 16.0) * specFactor;
+          float specFactor = texture2D(specularTexture, vUv).r; // Hämtar reflekterande värde från specular-texturen
+          float spec = pow(max(dot(viewDir, reflectDir), 0.0), 16.0) * specFactor;  // Beräknar spegelreflektion med exponent 16
 
-          vec3 diffuse = max(dot(normal, lightDir), 0.0) * pointLights[0].color;
-          vec3 finalColor = color.xyz * (diffuse + ambientLightColor) + spec * pointLights[0].color;
+          vec3 diffuse = max(dot(normal, lightDir), 0.0) * pointLights[0].color; // Beräknar diffus ljusreflektion
+          vec3 finalColor = color.xyz * (diffuse + ambientLightColor) + spec * pointLights[0].color; // Kombinerar alla ljuseffekter
 
-          gl_FragColor = vec4(finalColor, 1.0);
+          gl_FragColor = vec4(finalColor, 1.0); // Sätter den slutliga färgen för pixeln
       }
     </script>
 
