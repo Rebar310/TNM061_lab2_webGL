@@ -95,7 +95,7 @@ function init() {
   sunGroup.add(sunMesh);
 
   // **Lägg till ljuskällor**
-  var sunLight = new THREE.PointLight(0xffffff, 5, 500); // Punktljus placerat i solen
+  var sunLight = new THREE.PointLight(0xffffff, 2, 500); // Punktljus placerat i solen
   sunGroup.add(sunLight);
   var ambientLight = new THREE.AmbientLight(0x202020); // Svagt omgivande ljus
   sceneRoot.add(ambientLight);
